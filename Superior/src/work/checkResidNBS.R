@@ -4,7 +4,7 @@
 #   and compares with computed rNBS
 #
 # Clear memory
-rm(list=ls())
+# rm(list=ls())
 #
 # Set pathname to working directory
 pName    <- getwd()
@@ -15,15 +15,15 @@ df1      <- read.table(fullName, header = TRUE, sep = "\t", comment.char = "#")
 mat1     <- as.matrix(df1[,2:13])
 #
 # Convert transposed matrix to vector
-storCMS      <- as.vector(t(mat1))
+dStoCMS      <- as.vector(t(mat1))
 storBegDate  <- as.Date(paste(df1[1,1],'01/01',sep="/"))
 storEndDate  <- as.Date(paste(tail(df1[,1], n= 1),"12/01",sep="/"))
 # Create date sequence
 DateSeq  <- seq(from = storBegDate, to = storEndDate, by = "month")
 # Create dataframe for prec
-storDf       <- cbind.data.frame(DateSeq,storCMS)
+storDf       <- cbind.data.frame(DateSeq,dStoCMS)
 # Plot net basin supply
-plot(    DateSeq,storCMS,type="l",
+plot(    DateSeq,dStoCMS,type="l",
          main="Change in Lake Superior Storage",
          ylab="cubic meters per second", xlab="year",col="blue")
 abline(h= 0, col="slategray", lty = "dashed")
@@ -46,8 +46,6 @@ stmrDf       <- cbind.data.frame(stmrDateSeq,stmrCMS)
 plot(stmrDateSeq,stmrCMS,type="l",
      main="St. Marys River Outflow from Lake Superior",
      ylab="cubic meters per second", xlab="year",col="brown4")
-# Clean up 
-rm(list=c('df1','mat1'))
 #
 # Read inflow diversions data
 fName    <- "/Superior/data/Monthly/SupDiversionsCMS.txt"
@@ -66,12 +64,6 @@ divrDf       <- cbind.data.frame(divrDateSeq,divrCMS)
 plot(divrDateSeq,divrCMS,type="l",
      main="Diversions from Ogoki and Long Lake to Lake Superior",
      ylab="cubic meters per second", xlab="year",col="brown4")
-# Clean up 
-rm(list=c('df1','mat1',"stmrDf","storStmrDf"))
-rm(list=c("NBSrDf","divrDf","strmDf","storDf","storStmrDivrNBSrDf","storStrmDivrDf"))
-
-#
-
 #
 # Read computed residual NBS data
 fName    <- "/Superior/data/Monthly/SupNBSresidCMS.txt"
@@ -91,8 +83,6 @@ plot(NBSrDateSeq,NBSrCMS,type="l",
      main="Residual Net Basin Supply for Lake Superior",
      ylab="cubic meters per second", xlab="year",col="brown4")
 abline(h= 0, col="slategray", lty = "dashed")
-# Clean up 
-rm(list=c('df1','mat1'))
 #
 # Merge dataframe by date
 # Merge change in storage and st. marys flow dataframes on date
@@ -102,18 +92,19 @@ storStrmDivrDf  <- merge(storStmrDf, divrDf, by.x = "DateSeq", by.y = "divrDateS
 # Merge with rNBS by date
 storStmrDivrNBSrDf  <- merge(storStrmDivrDf, NBSrDf, by.x = "DateSeq", by.y = "NBSrDateSeq")
 # Check rNBS as the sum of change in storage plus outflow
-storStmrDivrNBSrDf$checkNBSrCMS <- storStmrDivrNBSrDf$storCMS + storStmrDivrNBSrDf$stmrCMS -
-  storStmrDivrNBSrDf$divrCMS; 
+checkNBSrCMS <- storStmrDivrNBSrDf$dStoCMS + storStmrDivrNBSrDf$stmrCMS - storStmrDivrNBSrDf$divrCMS; 
 # Simplify merged dataframe name
-checkNBSrDf  <- storStmrDivrNBSrDf
+NBSrDf       <- storStmrDivrNBSrDf
 #
-with(checkNBSrDf, plot(checkNBSrCMS,NBSrCMS,pch=20,cex=0.75,col="tan",
+plot(checkNBSrCMS,NBSrDf$NBSrCMS,pch=20,cex=0.75,col="tan",
                       xlab="Change in Storage plus Outflow, in m^3/s",
                       ylab="Residual Net Basin Supply, in m^3/s",
                       main="Relation Between Computed and Apparent Lake Superior Residual Net Basin Supply",
-                      cex.main = 0.8))
+                      cex.main = 0.8)
 abline(0,1,col="red",lty="dashed")
 #
+# Clean up variables except selected 
+rm(list=setdiff(ls(), c("NBSrDf","NBScDf")))
 
 
 
