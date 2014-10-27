@@ -1,0 +1,20 @@
+# Data Source is NBS_SUP.xlsx!Area accessed Oct. 23, 2014
+# The data contained within this spreadsheet were calculated/compiled by Tim Hunter at:
+# U.S. Department of Commerce
+# National Oceanic and Atmospheric Administration
+# Office of Oceanic and Atmospheric Research
+# Great Lakes Environmental Research Laboratory
+# 4840 South State Road
+# Ann Arbor, MI  48108
+# tim.hunter@noaa.gov
+# 
+Lake	DigitalLand	DigitalLake	DigitalBasin	CoordLand	CoordLake	LakeChannelCoordLand	LakeChannelBothCoordLake	
+Superior	1.28084E+11	8.19250E+10	2.10009E+11		1.28E+11	8.21E+10	1.28E+11	8.21E+10
+Michigan-Huron	2.48012E+11	1.16851E+11	3.64863E+11		2.49E+11	1.17E+11	2.52E+11	1.18E+11
+Michigan	1.15804E+11	5.72910E+10	1.73095E+11		1.18E+11	5.78E+10	1.18E+11	5.78E+10
+Huron	1.32208E+11	5.95600E+10	1.91768E+11		1.31E+11	5.96E+10	1.34E+11	5.98E+10
+Huron w/o Georgian Bay	5.04880E+10	4.06110E+10	9.10990E+10		5.00E+10	4.06E+10	5.12E+10	4.08E+10
+Georgian Bay	8.17200E+10	1.89490E+10	1.00669E+11		8.10E+10	1.90E+10	8.28E+10	1.90E+10
+St. Clair	1.57370E+10	1.10900E+09	1.68460E+10		1.24E+10	1.11E+09	1.57E+10	1.17E+09
+Erie	6.06020E+10	2.54040E+10	8.60060E+10		5.88E+10	2.57E+10	6.10E+10	2.58E+10
+Ontario	6.51180E+10	1.91210E+10	8.42390E+10		6.06E+10	1.90E+10	6.40E+10	1.90E+10

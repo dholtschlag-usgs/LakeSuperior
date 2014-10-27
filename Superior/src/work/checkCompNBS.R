@@ -101,5 +101,40 @@ plot(NBScDf$NBScCMS,nbsxCMS,pch=20,cex=0.75,col="tan",
 abline(0,1,col="red",lty="dashed")
 #
 rm(list=setdiff(ls(),c("NBSrDf","NBScDf")))
-
-
+#
+# Density of Precipitation
+densPrecCMS <- density(NBScDf$precCMS)
+plot(densPrecCMS,xlab=expression(paste("Monthly Flow Equivalent, in  ",m^{3} %.% s^{-1})),
+     ylab="Empirical Probability Density",
+     main="Lake Superior Monthly Estimates of Precipitation")
+x1 <- min(which(densPrecCMS$x >=  -0))  
+x2 <- max(which(densPrecCMS$x <  6000))
+with(densPrecCMS, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="tan"))
+#
+# Density of Evaporation
+densEvapCMS <- density(NBScDf$evapCMS)
+plot(densEvapCMS,xlab=expression(paste("Monthly Flow Equivalent, in  ",m^{3} %.% s^{-1})),
+     ylab="Empirical Probability Density",
+     main="Lake Superior Monthly Estimates of Evaporation")
+x1 <- min(which(densEvapCMS$x >= -2000))  
+x2 <- max(which(densEvapCMS$x <   6000))
+with(densEvapCMS, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="tan"))
+#
+# Density of Basin Runoff
+densrOffCMS <- density(NBScDf$rOffCMS)
+plot(densrOffCMS,xlab=expression(paste("Monthly Flow Equivalent, in  ",m^{3} %.% s^{-1})),
+     ylab="Empirical Probability Density",
+     main="Lake Superior Monthly Estimates of Basin Runoff")
+x1 <- min(which(densrOffCMS$x >=   200))  
+x2 <- max(which(densrOffCMS$x <   6000))
+with(densrOffCMS, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="tan"))
+#
+# Density of Net Basin Supply
+densNBSc <- density(NBScDf$NBScCMS)
+plot(densNBSc,xlab=expression(paste("Monthly Flow, in  ",m^{3} %.% s^{-1})),
+     ylab="Empirical Probability Density",
+     main="Lake Superior Components Estimate of Net Basin Supply")
+densNBS  
+x1 <- min(which(densStmr$x >= -5000))  
+x2 <- max(which(densStmr$x <  11000))
+with(densNBSc, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="tan"))

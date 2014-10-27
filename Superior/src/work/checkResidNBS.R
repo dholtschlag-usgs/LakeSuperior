@@ -3,8 +3,6 @@
 # Reads in change in Lake Superior storage and St. Marys River outflow  
 #   and compares with computed rNBS
 #
-# Clear memory
-# rm(list=ls())
 #
 # Set pathname to working directory
 pName    <- getwd()
@@ -28,7 +26,7 @@ plot(    DateSeq,dStoCMS,type="l",
          ylab="cubic meters per second", xlab="year",col="blue")
 abline(h= 0, col="slategray", lty = "dashed")
 # Clean up 
-#
+# 
 # Read outflow data
 fName    <- "/Superior/data/Monthly/SupStMarysCMS.txt"
 fullName <- paste(pName,fName,sep="")
@@ -103,9 +101,44 @@ plot(checkNBSrCMS,NBSrDf$NBSrCMS,pch=20,cex=0.75,col="tan",
                       cex.main = 0.8)
 abline(0,1,col="red",lty="dashed")
 #
+# Density of Changes in Lake Storage
+densdStoCMS <- density(NBSrDf$dStoCMS)
+plot(densdStoCMS,xlab=expression(paste("Monthly Flow Equivalent, in  ",m^{3} %.% s^{-1})),
+     ylab="Empirical Probability Density",
+     main="Lake Superior Monthly Estimates of Change in Storage")
+x1 <- min(which(densdStoCMS$x >= -5500))  
+x2 <- max(which(densdStoCMS$x <   8000))
+with(densdStoCMS, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="tan"))
+#
+par(mar=c(5,5,4,2))
+plot(DateSeq,cumsum(NBSrDf$dStoCMS),type="l",col="blue",
+     xlab="Year",
+     ylab=expression(paste("Cumulative Sum of Change in Storage (  ", m^{3} %.% s^{-1},")")),
+     main="Cumulative Sum of Monthly Changes in Lake Superior Storage")
+abline(h=0,col="red",lty="dashed")
+
+# Density of Changes in Lake Storage
+densstmrCMS <- density(NBSrDf$stmrCMS)
+plot(densstmrCMS,xlab=expression(paste("Monthly Flow Equivalent, in  ",m^{3} %.% s^{-1})),
+     ylab="Empirical Probability Density",
+     main="Lake Superior Monthly Outflows through St. Marys River")
+x1 <- min(which(densstmrCMS$x >=  1000))  
+x2 <- max(which(densstmrCMS$x <   3750))
+with(densstmrCMS, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="tan"))
+
+#
+# Density of Monthly Diversions in Lake Superior
+densdivrCMS <- density(NBSrDf$divrCMS)
+plot(densdivrCMS,xlab=expression(paste("Monthly Flow Equivalent, in  ",m^{3} %.% s^{-1})),
+     ylab="Empirical Probability Density",
+     main="Monthly Diversions into Lake Superior from Long Lake and Ogoki Lake")
+x1 <- min(which(densdivrCMS$x >=     0))  
+x2 <- max(which(densdivrCMS$x <    450))
+with(densdivrCMS, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="tan"))
+#
 # Clean up variables except selected 
 rm(list=setdiff(ls(), c("NBSrDf","NBScDf")))
-
+#
 
 
 
