@@ -22,7 +22,7 @@ DateSeq  <- seq(from = storBegDate, to = storEndDate, by = "month")
 storDf       <- cbind.data.frame(DateSeq,dStoCMS)
 # Plot net basin supply
 plot(    DateSeq,dStoCMS,type="l",
-         main="Change in Lake Superior Storage",
+         main="Monthly Series of Changes in Lake Superior Storage",
          ylab="cubic meters per second", xlab="year",col="blue")
 abline(h= 0, col="slategray", lty = "dashed")
 # Clean up 
@@ -42,7 +42,7 @@ stmrDateSeq  <- seq(from = stmrBegDate, to = stmrEndDate, by = "month")
 stmrDf       <- cbind.data.frame(stmrDateSeq,stmrCMS)
 # Plot monthly runoff time series
 plot(stmrDateSeq,stmrCMS,type="l",
-     main="St. Marys River Outflow from Lake Superior",
+     main="Monthly Series of St. Marys River Outflows from Lake Superior",
      ylab="cubic meters per second", xlab="year",col="brown4")
 #
 # Read inflow diversions data
@@ -60,7 +60,7 @@ divrDateSeq  <- seq(from = divrBegDate, to = divrEndDate, by = "month")
 divrDf       <- cbind.data.frame(divrDateSeq,divrCMS)
 # Plot monthly diversion time series
 plot(divrDateSeq,divrCMS,type="l",
-     main="Diversions from Ogoki and Long Lake to Lake Superior",
+     main="Monthly Series of Diversions from Ogoki and Long Lake to Lake Superior",
      ylab="cubic meters per second", xlab="year",col="brown4")
 #
 # Read computed residual NBS data
@@ -78,7 +78,7 @@ NBSrDateSeq  <- seq(from = NBSrBegDate, to = NBSrEndDate, by = "month")
 NBSrDf       <- cbind.data.frame(NBSrDateSeq,NBSrCMS)
 # Plot monthly runoff time series
 plot(NBSrDateSeq,NBSrCMS,type="l",
-     main="Residual Net Basin Supply for Lake Superior",
+     main="Monthly Series of Residual Net Basin Supply for Lake Superior",
      ylab="cubic meters per second", xlab="year",col="brown4")
 abline(h= 0, col="slategray", lty = "dashed")
 #
@@ -105,36 +105,70 @@ abline(0,1,col="red",lty="dashed")
 densdStoCMS <- density(NBSrDf$dStoCMS)
 plot(densdStoCMS,xlab=expression(paste("Monthly Flow Equivalent, in  ",m^{3} %.% s^{-1})),
      ylab="Empirical Probability Density",
-     main="Lake Superior Monthly Estimates of Change in Storage")
-x1 <- min(which(densdStoCMS$x >= -5500))  
-x2 <- max(which(densdStoCMS$x <   8000))
+     main="Probability Density of Lake Superior Monthly Estimates of Change in Storage")
+x1 <- min(which(densdStoCMS$x >= min(NBSrDf$dStoCMS) ))  
+x2 <- max(which(densdStoCMS$x <  max(NBSrDf$dStoCMS) ))
 with(densdStoCMS, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="tan"))
 #
 par(mar=c(5,5,4,2))
 plot(DateSeq,cumsum(NBSrDf$dStoCMS),type="l",col="blue",
      xlab="Year",
      ylab=expression(paste("Cumulative Sum of Change in Storage (  ", m^{3} %.% s^{-1},")")),
-     main="Cumulative Sum of Monthly Changes in Lake Superior Storage")
+     main="Series of Cumulative Sum of Monthly Changes in Lake Superior Storage")
 abline(h=0,col="red",lty="dashed")
 
-# Density of Changes in Lake Storage
+# Probability density of St. Marys River Outflows
 densstmrCMS <- density(NBSrDf$stmrCMS)
 plot(densstmrCMS,xlab=expression(paste("Monthly Flow Equivalent, in  ",m^{3} %.% s^{-1})),
      ylab="Empirical Probability Density",
-     main="Lake Superior Monthly Outflows through St. Marys River")
-x1 <- min(which(densstmrCMS$x >=  1000))  
-x2 <- max(which(densstmrCMS$x <   3750))
+     main="Probability Density of Lake Superior Monthly Outflows through St. Marys River")
+x1 <- min(which(densstmrCMS$x >=  min(NBSrDf$stmrCMS) ))  
+x2 <- max(which(densstmrCMS$x <   max(NBSrDf$stmrCMS) ))
 with(densstmrCMS, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="tan"))
 
 #
-# Density of Monthly Diversions in Lake Superior
+# Probability density of Monthly Diversions in Lake Superior
 densdivrCMS <- density(NBSrDf$divrCMS)
 plot(densdivrCMS,xlab=expression(paste("Monthly Flow Equivalent, in  ",m^{3} %.% s^{-1})),
      ylab="Empirical Probability Density",
-     main="Monthly Diversions into Lake Superior from Long Lake and Ogoki Lake")
-x1 <- min(which(densdivrCMS$x >=     0))  
-x2 <- max(which(densdivrCMS$x <    450))
+     main="Probability Density of Monthly Diversions into Lake Superior from Long Lake and Ogoki Lake")
+x1 <- min(which(densdivrCMS$x >= min(NBSrDf$divrCMS) ))  
+x2 <- max(which(densdivrCMS$x <  max(NBSrDf$divrCMS) ))
 with(densdivrCMS, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="tan"))
+#
+pairs(NBSrDf,pch=20,cex=0.5,col="blue",
+      labels=c("Date","Storage Change","St.Marys River","Diversions","rNBS"))
+#
+#
+boxplot(NBSrDf$stmrCMS ~ format(NBSrDf$DateSeq, "%m"),
+        names=unique(format(NBSrDf$DateSeq, "%b")),
+        ylab=expression(paste("Precipitation,   ",m^{3} %.% s^{-1})),
+        par(mar=c(5,4.4,4,2)+0.1),las=1,
+        main="Monthly Distribution of St. Marys River Outflows",
+        cex.main=0.9)
+#
+boxplot(NBSrDf$divrCMS ~ format(NBSrDf$DateSeq, "%m"),
+        names=unique(format(NBSrDf$DateSeq, "%b")),
+        ylab=expression(paste("Diversions,   ",m^{3} %.% s^{-1})),
+        par(mar=c(5,5,4,2)+0.1),
+        main="Monthly Distribution of Diversions from Ogoki and Long Lakes to Lake Superior",
+        cex.main=0.9)
+#
+boxplot(NBSrDf$dStoCMS ~ format(NBSrDf$DateSeq, "%m"),
+        names=unique(format(NBSrDf$DateSeq, "%b")),
+        ylab=expression(paste("Change in Storage,   ",m^{3} %.% s^{-1})),
+        par(mar=c(5,5,4,2)+0.1),
+        main="Monthly Distribution of Changes in Storage of Lake Superior",
+        cex.main=0.9)
+abline(h=0,col="red",lty="dashed")
+#
+boxplot(NBSrDf$NBSrCMS ~ format(NBSrDf$DateSeq, "%m"),
+        names=unique(format(NBSrDf$DateSeq, "%b")),
+        ylab=expression(paste("Net Basin Supply,   ",m^{3} %.% s^{-1})),
+        par(mar=c(5,5,4,2)+0.1),
+        main="Monthly Distribution of Residuals Estimate of Net Basin Supply for Lake Superior",
+        cex.main=0.9)
+abline(h=0,col="red",lty="dashed")
 #
 # Clean up variables except selected 
 rm(list=setdiff(ls(), c("NBSrDf","NBScDf")))

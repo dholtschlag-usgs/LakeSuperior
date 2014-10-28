@@ -7,6 +7,7 @@
 # 4840 South State Road
 # Ann Arbor, MI  48108
 # tim.hunter@noaa.gov
+# Lake areas in square meters for each lake basin (digital and coordinated)
 # 
 Lake	DigitalLand	DigitalLake	DigitalBasin	CoordLand	CoordLake	LakeChannelCoordLand	LakeChannelBothCoordLake	
 Superior	1.28084E+11	8.19250E+10	2.10009E+11		1.28E+11	8.21E+10	1.28E+11	8.21E+10

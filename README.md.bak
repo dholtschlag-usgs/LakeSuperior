@@ -13,6 +13,7 @@ Monthly data for the component net basin supply analysis was provided by Tim Hun
    R-Script                                   Function
 ----------------   -------------------------------------------------------------------
 checkCompNBS.R     Reads text files of data to confirm estimated and computed NBS for components method.
+
 checkResidNBS.R    Reads text files of data to confirm estimated and computed NBS for residuals methods.
 
 
