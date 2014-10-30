@@ -1,0 +1,55 @@
+---
+title: "Analysis of Elements of Component Net Basin Supply for Lake Superior"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+# Note: linking to the "raw" file, rather than the display version
+# Apparent URL for github file is:
+#   https://github.com/dholtschlag-usgs/LakeSuperior/blob/master/Superior/data/Monthly/SupPrecipCMS.txt
+#
+# Data retrieval URL for this file is:
+urlName <- "https://raw.githubusercontent.com/dholtschlag-usgs/LakeSuperior/master/Superior/data/Monthly/SupPrecipCMS.txt"
+#
+library(utils)
+# method="curl" does not work
+download.file(urlName, destfile = "SupPrecipCMS.txt", method = "wget")
+# Create a dataframe 
+df1 <- read.table("SupPrecipCMS.txt",sep="\t",header=TRUE,comment.char="#")
+# List summary of the data frame
+summary(df1)
+# Convert the data frame to a matrix
+mat1  <- as.matrix(df1[,2:13])
+#
+# Convert transposed matrix to vector
+precCMS      <- as.vector(t(mat1))
+# Find start and end data of precipitation series
+precBegDate  <- as.Date(paste(df1[1,1],'01/01',sep="/"))
+precEndDate  <- as.Date(paste(tail(df1[,1], n= 1),"12/01",sep="/"))
+# Create date sequence
+DateSeq  <- seq(from = precBegDate, to = precEndDate, by = "month")
+# Create dataframe for prec
+precDf       <- cbind.data.frame(DateSeq,precCMS)
+# Plot net basin supply
+plot(DateSeq,precCMS,type="l",
+     main="Monthly Series of Overlake Precipiation for Lake Superior",
+     ylab="Precipitation, in m^3/s", xlab="Year",col="blue")
+```
+
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+# 
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+
+
+

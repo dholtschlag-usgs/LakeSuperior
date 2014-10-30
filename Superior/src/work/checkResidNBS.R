@@ -2,7 +2,8 @@
 # rNBS = ChangeInStorage - Inflow + Outflow
 # Reads in change in Lake Superior storage and St. Marys River outflow  
 #   and compares with computed rNBS
-#
+# locfit is used in density estimation
+library(locfit)
 #
 # Set pathname to working directory
 pName    <- getwd()
@@ -21,9 +22,11 @@ DateSeq  <- seq(from = storBegDate, to = storEndDate, by = "month")
 # Create dataframe for prec
 storDf       <- cbind.data.frame(DateSeq,dStoCMS)
 # Plot net basin supply
+par(mar=c(5,4.4,4,2)+0.1,las=1)
 plot(    DateSeq,dStoCMS,type="l",
          main="Monthly Series of Changes in Lake Superior Storage",
-         ylab="cubic meters per second", xlab="year",col="blue")
+         ylab=expression(paste("Change in Storage, in   ",m^3 %.% s^-1)),
+         xlab="year",col="blue")
 abline(h= 0, col="slategray", lty = "dashed")
 # Clean up 
 # 
@@ -41,9 +44,11 @@ stmrDateSeq  <- seq(from = stmrBegDate, to = stmrEndDate, by = "month")
 # Create dataframe for prec
 stmrDf       <- cbind.data.frame(stmrDateSeq,stmrCMS)
 # Plot monthly runoff time series
+par(mar=c(5,4.4,4,2)+0.1,las=1)
 plot(stmrDateSeq,stmrCMS,type="l",
      main="Monthly Series of St. Marys River Outflows from Lake Superior",
-     ylab="cubic meters per second", xlab="year",col="brown4")
+     ylab=expression(paste("Outflow, in   ",m^3 %.% s^-1)),
+     xlab="year",col="brown4")
 #
 # Read inflow diversions data
 fName    <- "/Superior/data/Monthly/SupDiversionsCMS.txt"
@@ -59,9 +64,11 @@ divrDateSeq  <- seq(from = divrBegDate, to = divrEndDate, by = "month")
 # Create dataframe for diversions
 divrDf       <- cbind.data.frame(divrDateSeq,divrCMS)
 # Plot monthly diversion time series
+par(mar=c(5,4.4,4,2)+0.1,las=1)
 plot(divrDateSeq,divrCMS,type="l",
      main="Monthly Series of Diversions from Ogoki and Long Lake to Lake Superior",
-     ylab="cubic meters per second", xlab="year",col="brown4")
+     ylab=expression(paste("Diversions into Lake Superior, in   ",m^3 %.% s^-1)),
+     xlab="year",col="brown4")
 #
 # Read computed residual NBS data
 fName    <- "/Superior/data/Monthly/SupNBSresidCMS.txt"
@@ -77,9 +84,11 @@ NBSrDateSeq  <- seq(from = NBSrBegDate, to = NBSrEndDate, by = "month")
 # Create dataframe for rNBS
 NBSrDf       <- cbind.data.frame(NBSrDateSeq,NBSrCMS)
 # Plot monthly runoff time series
+par(mar=c(5,4.4,4,2)+0.1,las=1)
 plot(NBSrDateSeq,NBSrCMS,type="l",
      main="Monthly Series of Residual Net Basin Supply for Lake Superior",
-     ylab="cubic meters per second", xlab="year",col="brown4")
+     ylab=expression(paste("Residual Net Basin Supply, in   ",m^3 %.% s^-1)),
+     xlab="Year",col="brown4")
 abline(h= 0, col="slategray", lty = "dashed")
 #
 # Merge dataframe by date
@@ -94,11 +103,12 @@ checkNBSrCMS <- storStmrDivrNBSrDf$dStoCMS + storStmrDivrNBSrDf$stmrCMS - storSt
 # Simplify merged dataframe name
 NBSrDf       <- storStmrDivrNBSrDf
 #
+par(mar=c(5,4.4,4,2)+0.1,las=1)
 plot(checkNBSrCMS,NBSrDf$NBSrCMS,pch=20,cex=0.75,col="tan",
-                      xlab="Change in Storage plus Outflow, in m^3/s",
-                      ylab="Residual Net Basin Supply, in m^3/s",
-                      main="Relation Between Computed and Apparent Lake Superior Residual Net Basin Supply",
-                      cex.main = 0.8)
+     xlab=expression(paste("Change In Storage - Inflow + Outflow, in   ",m^3 %.% s^-1)),
+     ylab=expression(paste("Residual Net Basin Supply, in   ",m^3 %.% s^-1)),
+     main="Relation Between Computed and Apparent Lake Superior Residual Net Basin Supply",
+     cex.main = 0.9)
 abline(0,1,col="red",lty="dashed")
 #
 # Density of Changes in Lake Storage
@@ -125,16 +135,27 @@ plot(densstmrCMS,xlab=expression(paste("Monthly Flow Equivalent, in  ",m^{3} %.%
 x1 <- min(which(densstmrCMS$x >=  min(NBSrDf$stmrCMS) ))  
 x2 <- max(which(densstmrCMS$x <   max(NBSrDf$stmrCMS) ))
 with(densstmrCMS, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="tan"))
-
 #
 # Probability density of Monthly Diversions in Lake Superior
-densdivrCMS <- density(NBSrDf$divrCMS)
-plot(densdivrCMS,xlab=expression(paste("Monthly Flow Equivalent, in  ",m^{3} %.% s^{-1})),
+# library(locfit) is needed
+locMod   <- locfit( ~ lp(NBSrDf$divrCMS))
+# densdivrCMS <- density(NBSrDf$divrCMS)
+# Quantiles to evalute 
+locEval  <- seq(min(NBSrDf$divrCMS),max(NBSrDf$divrCMS),length.out = 500)
+# Estimates for evaluated quantiles
+locFit   <- predict(locMod,locEval)
+par(mfrow=c(1,1), mar=c(5,4,4,2)+0.1)
+plot(locEval,locFit,type="l",
+     xlab=expression(paste("Monthly Flow Equivalent, in  ",m^{3} %.% s^{-1})),
      ylab="Empirical Probability Density",
-     main="Probability Density of Monthly Diversions into Lake Superior from Long Lake and Ogoki Lake")
-x1 <- min(which(densdivrCMS$x >= min(NBSrDf$divrCMS) ))  
-x2 <- max(which(densdivrCMS$x <  max(NBSrDf$divrCMS) ))
-with(densdivrCMS, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="tan"))
+     main="Probability Density of Monthly Diversions into Lake Superior\n from Long Lake and Ogoki Lake",
+     cex.main=0.8,sub="Function locfit used in density approximation")
+x1 <- min(which(locEval >=  min(NBSrDf$divrCMS) ))  
+x2 <- max(which(locEval <   max(NBSrDf$divrCMS) ))
+polygon(x=c(locEval,                rev(locEval),locEval[1]),
+        y=c(rep(0,length(locEval)), rev(locFit ),0),
+        col="tan")
+# abline(v=0,col="red",lty="dashed")
 #
 pairs(NBSrDf,pch=20,cex=0.5,col="blue",
       labels=c("Date","Storage Change","St.Marys River","Diversions","rNBS"))
@@ -171,7 +192,7 @@ boxplot(NBSrDf$NBSrCMS ~ format(NBSrDf$DateSeq, "%m"),
 abline(h=0,col="red",lty="dashed")
 #
 # Clean up variables except selected 
-rm(list=setdiff(ls(), c("NBSrDf","NBScDf")))
+# rm(list=setdiff(ls(), c("NBSrDf","NBScDf")))
 #
 
 

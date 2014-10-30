@@ -17,7 +17,7 @@ rm(list=setdiff(ls(),"NBSrcDf"))
 library(MARSS)
 #
 densStmr <- density(NBSrcDf$stmrCMS)
-plot(densStmr,xlab="Monthly Flow, in m^{3} s{-1}")
+plot(densStmr,xlab=expression(paste("Monthly Flow, in ", m^{3} %.% s^{-1})))
 x1 <- min(which(densStmr$x >= 1000))  
 x2 <- max(which(densStmr$x <  4000))
 with(densStmr, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="salmon"))
@@ -47,20 +47,21 @@ covariates <- rbind(prec,rOff,divr,evap,dSto)
 yearBeg <- NBSrcDf$DateSeq[1]
 yearEnd <- NBSrcDf$DateSeq[TT]
 ## Estimate linear model 
-linearRegModel     <- lm(stmr ~ prec + rOff + evap + dSto + divr + I(rOff^2))
+linearRegModel     <- lm(stmr ~ prec + rOff + evap + dSto + divr)
 summary(linearRegModel)
 plot(stmr,predict(linearRegModel),pch=20,col="blue",cex=0.8,
      xlab=expression("Measured Average Monthly Flow in St. Marys River Flow, in" ~ m^{3}~s^{-1}),
      ylab=expression("Estimated Average Monthly Flow, in " ~m^{3}~s^{-1}),
      main=paste("Measured and Linear Regression Estimates of Monthly Flow\n", 
                 "of St. Marys River from ",yearBeg,' to ',yearEnd,sep=""),cex.main=0.8)
-abline(0,1,col="red",lty"dashed")
+abline(0,1,col="red",lty="dashed")
 #
 plot(stmr,residuals(linearRegModel),pch=20,col="blue",cex=0.8,
      xlab=expression("Measured Average Monthly Flow in St. Marys River Flow, in" ~ m^{3}~s^{-1}),
-     ylab=expression("Residuals of Average Monthly Flow, in " ~m^{3}~s^{-1}),
-     main=paste("Measured and Linear Regression Estimates of Monthly Flow\n", 
-                "of St. Marys River from ",yearBeg,' to ',yearEnd,sep=""),cex.main=0.8)
+     ylab=expression("Residuals of Average Monthly Flow, in   " ~m^{3}~s^{-1}),
+     main=paste("Residuals of Measured and Linear Regression Estimates of Monthly Flow\n", 
+                "of St. Marys River from ",yearBeg,' to ',yearEnd,sep=""),
+     cex.main=0.8)
 abline(h=0,col="red",lty="dashed")
 #
 ## MARSS Observation model only with data in original units
