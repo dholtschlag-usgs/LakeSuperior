@@ -6,6 +6,7 @@
 # generate components dataframe
 # Clear variables
 rm(list=ls())
+library(MASS)
 #
 pName     <- getwd()
 fName     <- "/Superior/src/work/setupMonthlyDataFrame.R"
@@ -17,14 +18,13 @@ rm(list=setdiff(ls(),"NBSrcDf"))
 library(MARSS)
 #
 densStmr <- density(NBSrcDf$stmrCMS)
-plot(densStmr,xlab=expression(paste("Monthly Flow, in ", m^{3} %.% s^{-1})))
+plot(densStmr,xlab=expression(paste("Monthly Flow, in ", m^{3} %.% s^{-1})),
+     sub ="Kernel Density Estimation with the density {stats} Function",
+     main="Probability Density of Lake Superior Monthly Outflows Through St. Marys River",
+     cex.main=0.95)
 x1 <- min(which(densStmr$x >= 1000))  
 x2 <- max(which(densStmr$x <  4000))
-with(densStmr, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="salmon"))
-x1 <- min(which(densStmr$x >= 2600))  
-x2 <- max(which(densStmr$x <  3250))
-with(densStmr, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="grey"))
-
+with(densStmr, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="tan"))
 #
 ## Regression Model with lm and MARSS
 # Component NBS Eqn:
@@ -34,6 +34,8 @@ with(densStmr, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="grey")
 # Water budget for Lake Superior
 # Outflow = Prec + Runoff - Evap - ChangeInStorage + Div
 #    stmr = prec + rOff   - evap - dSto            + divr  
+
+# Taking subset to develop model, remaining 5 years are for testing
 TT         <- 696                    # 58 years of monthly data
 stmr       <- NBSrcDf$stmrCMS[1:TT] 
 prec       <- NBSrcDf$precCMS[1:TT] 
@@ -57,6 +59,53 @@ plot(stmr,predict(linearRegModel),pch=20,col="blue",cex=0.8,
 abline(0,1,col="red",lty="dashed")
 #
 plot(stmr,residuals(linearRegModel),pch=20,col="blue",cex=0.8,
+     xlab=expression("Measured Average Monthly Flow in St. Marys River Flow, in" ~ m^{3}~s^{-1}),
+     ylab=expression("Residuals of Average Monthly Flow, in   " ~m^{3}~s^{-1}),
+     main=paste("Residuals of Measured and Linear Regression Estimates of Monthly Flow\n", 
+                "with the Magnitude of St. Marys River from ",yearBeg,' to ',yearEnd,sep=""),
+     cex.main=0.8)
+abline(h=0,col="red",lty="dashed")
+#
+# Define numeric vector for months
+monthNum <- as.numeric(format(NBSrcDf$DateSeq[1:TT], "%m"))
+# Initialize vector of colors
+colorPnt <- rep(NA, length.out=length(monthNum))
+# https://stat.ethz.ch/R-manual/R-devel/library/grDevices/html/palettes.html
+# rainbow, heat.colors, terrain.colors, topo.colors, cm.colors
+colorSet <- topo.colors(12)
+for (i in 1:12){
+  ndxColor <- which(monthNum==i)
+  colorPnt[ndxColor] <- colorSet[i]
+}
+#
+# Assessing possible trend in residuals 
+plot(NBSrcDf$DateSeq[1:TT],residuals(linearRegModel),pch=20,col=colorPnt,
+     xlab="Year",
+     ylab=expression("Residuals of Average Monthly Flow, in   " ~m^{3}~s^{-1}),
+     main="Residuals of Measured and Linear Regression Estimates of Monthly Flow with Time",
+     cex.main=0.8)
+abline(h=0,col="red",lty="dashed")
+legend("topleft",legend=month.abb,col=colorPnt,pch=20,cex=0.6)
+#
+# Assessing possible monthly seasonality in residuals
+boxplot(residuals(linearRegModel)~monthNum, notch=TRUE,
+        col=colorSet,names=month.abb,
+        main="Residuals of Linear Regression of St. Marys River Flow by Month",
+        ylab=expression("Residuals of Average Monthly Flow, in   " ~m^{3}~s^{-1}),
+        xlab="Month")
+abline(h=0,col="red",lty="dashed")
+#
+# Fit a robust linear regression to assess possible improvement
+rLinearRegModel     <- rlm(stmr ~ prec + rOff + evap + dSto + divr)
+summary(rLinearRegModel)
+plot(stmr,predict(rLinearRegModel),pch=20,col="blue",cex=0.8,
+     xlab=expression("Measured Average Monthly Flow in St. Marys River Flow, in" ~ m^{3}~s^{-1}),
+     ylab=expression("Estimated Average Monthly Flow, in " ~m^{3}~s^{-1}),
+     main=paste("Measured and Linear Regression Estimates of Monthly Flow\n", 
+                "of St. Marys River from ",yearBeg,' to ',yearEnd,sep=""),cex.main=0.8)
+abline(0,1,col="red",lty="dashed")
+#
+plot(stmr,residuals(rLinearRegModel),pch=20,col=colorPnt,cex=0.8,
      xlab=expression("Measured Average Monthly Flow in St. Marys River Flow, in" ~ m^{3}~s^{-1}),
      ylab=expression("Residuals of Average Monthly Flow, in   " ~m^{3}~s^{-1}),
      main=paste("Residuals of Measured and Linear Regression Estimates of Monthly Flow\n", 
@@ -101,7 +150,7 @@ the.sd     <- apply(covariates,1,sd  ,na.rm=TRUE)
 zCovariates<- (covariates - the.mean) * 1/the.sd
 #
 #
-## Linear model without intercept
+## Linear model with z-scored variated without intercept
 linearRegModelz     <- lm(t(zStmr) ~ 0 + t(zCovariates))
 summary(linearRegModelz)
 plot(zStmr,predict(linearRegModelz),

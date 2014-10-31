@@ -21,9 +21,11 @@ precEndDate  <- as.Date(paste(tail(df1[,1], n= 1),"12/01",sep="/"))
 # Create dataframe for prec
 precDf       <- cbind.data.frame(DateSeq,precCMS)
 # Plot net basin supply
-plot(    DateSeq,precCMS,type="l",
+par(mar=c(5,4.4,4,2)+0.1,las = 1)
+plot(DateSeq,precCMS,type="l",
      main="Monthly Series of Overlake Precipiation for Lake Superior",
-     ylab="cubic meters per second", xlab="year",col="blue")
+     ylab=expression(paste("Overlake Precipitation, in   ",m^3 %.% s^-1)), 
+     xlab="year",col="blue")
 #
 # Read evaporation data
 fName    <- "/Superior/data/Monthly/SupEvapCMS.txt"
@@ -41,7 +43,8 @@ evapDf       <- cbind.data.frame(evapDateSeq,evapCMS)
 # Plot monthly evaporation series
 plot(evapDateSeq,evapCMS,type="l",
      main="Monthly Series of Overlake Evaporation for Lake Superior",
-     ylab="cubic meters per second", xlab="year",col="salmon")
+     ylab=expression(paste("Overlake Evaporation, in   ",m^3 %.% s^-1)), 
+     xlab="year",col="salmon")
 abline(h= 0, col="slategray", lty = "dashed")
 #
 # Read runoff data
@@ -59,8 +62,9 @@ rOffDateSeq  <- seq(from = rOffBegDate, to = rOffEndDate, by = "month")
 rOffDf       <- cbind.data.frame(rOffDateSeq,rOffCMS)
 # Plot monthly runoff time series
 plot(rOffDateSeq,rOffCMS,type="l",
-     main="Monthly Series of Land Surface Runoff to Lake Superior",
-     ylab="cubic meters per second", xlab="year",col="brown4")
+     main = "Monthly Series of Land Surface Runoff to Lake Superior",
+     ylab = expression(paste("Basin Runoff, in   ",m^3 %.% s^-1)), 
+     xlab = "year",col="brown4")
 #
 # Read component NBS data
 fName    <- "/Superior/data/Monthly/SupNBScompCMS.txt"
@@ -78,7 +82,8 @@ nbs_Df       <- cbind.data.frame(nbs_DateSeq,NBScCMS)
 # Plot monthly runoff time series
 plot(nbs_DateSeq,NBScCMS,type="l",
      main="Monthly Series of Component Net Basin Supply for Lake Superior",
-     ylab="cubic meters per second", xlab="year",col="steelblue")
+     ylab=expression(paste("Component Net Basin Supply, in   ",m^3 %.% s^-1)),
+     xlab="year",col="steelblue")
 abline(h= 0, col="slategray", lty = "dashed")
 #
 # Merge prec and evap dataframes on date

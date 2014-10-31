@@ -18,4 +18,13 @@ source(fullName)
 # Merge the two data files by DateSeq
 NBSrcDf <- merge(NBScDf,NBSrDf)
 #
+# write the merged data set to an ascii file
+fName     <- "/Superior/data/Monthly/SupMergedCMS.txt"
+fullName  <- paste(pName,fName,sep="")
+#
+write.table(NBSrcDf,file=fullName,sep="\t",quote=FALSE,
+            row.names=FALSE)
+# Clean up
 rm(list=setdiff(ls(),"NBSrcDf"))
+
+

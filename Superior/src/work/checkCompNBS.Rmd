@@ -1,7 +1,7 @@
 checkCompNBS
 -------------------------------------------------------------------------
  
-* component_NBS = Precipitation + Runoff - Evaporation *
+## component_NBS = Precipitation + Runoff - Evaporation
 
 1 Read and Plot Overlake Precipitation Time Series  
 
@@ -27,9 +27,11 @@ DateSeq  <- seq(from = precBegDate, to = precEndDate, by = "month")
 # Create dataframe for prec
 precDf       <- cbind.data.frame(DateSeq,precCMS)
 # Plot net basin supply
-plot(    DateSeq,precCMS,type="l",
+par(mar=c(5,4.4,4,2)+0.1,las = 1)
+plot(DateSeq,precCMS,type="l",
      main="Monthly Series of Overlake Precipiation for Lake Superior",
-     ylab="cubic meters per second", xlab="year",col="blue")
+     ylab=expression(paste("Overlake Precipitation, in   ",m^3 %.% s^-1)), 
+     xlab="Year",col="blue")
 ```
 #
 2 Read and Plot Monthly Overlake Evaporation Time Series
@@ -50,9 +52,11 @@ evapDateSeq  <- seq(from = evapBegDate, to = evapEndDate, by = "month")
 # Create dataframe for prec
 evapDf       <- cbind.data.frame(evapDateSeq,evapCMS)
 # Plot monthly evaporation series
+par(mar=c(5,4.4,4,2)+0.1,las = 1)
 plot(evapDateSeq,evapCMS,type="l",
      main="Monthly Series of Overlake Evaporation for Lake Superior",
-     ylab="cubic meters per second", xlab="year",col="salmon")
+     ylab=expression(paste("Overlake Evaporation, in   ",m^3 %.% s^-1)),
+     xlab="Year",col="salmon")
 abline(h= 0, col="slategray", lty = "dashed")
 #
 ```
@@ -76,9 +80,11 @@ rOffDateSeq  <- seq(from = rOffBegDate, to = rOffEndDate, by = "month")
 # Create dataframe for prec
 rOffDf       <- cbind.data.frame(rOffDateSeq,rOffCMS)
 # Plot monthly runoff time series
+par(mar=c(5,4.4,4,2)+0.1,las = 1)
 plot(rOffDateSeq,rOffCMS,type="l",
-     main="Monthly Series of Land Surface Runoff to Lake Superior",
-     ylab="cubic meters per second", xlab="year",col="brown4")
+     main="Monthly Series of Basin Runoff to Lake Superior",
+     ylab=expression(paste("Basin Runoff, in   ",m^3 %.% s^-1)), 
+     xlab="Year",col="brown4")
 #
 ```
 
@@ -100,9 +106,11 @@ nbs_DateSeq  <- seq(from = nbs_BegDate, to = nbs_EndDate, by = "month")
 # Create dataframe for prec
 nbs_Df       <- cbind.data.frame(nbs_DateSeq,NBScCMS)
 # Plot monthly runoff time series
+par(mar=c(5,4.4,4,2)+0.1,las = 1)
 plot(nbs_DateSeq,NBScCMS,type="l",
      main="Monthly Series of Component Net Basin Supply for Lake Superior",
-     ylab="cubic meters per second", xlab="year",col="steelblue")
+     ylab=expression(paste("Component Net Basin Supply, in   ",m^3 %.% s^-1)), 
+     xlab="Year",col="steelblue")
 abline(h= 0, col="slategray", lty = "dashed")
 #
 # Merge prec and evap dataframes on date
@@ -117,10 +125,10 @@ rm(list=c("precDf","evapDf","rOffDf","nbs_Df","precEvapDf","precEvaprOffDf"))
 nbsxCMS <- NBScDf$prec - NBScDf$evap + NBScDf$rOff
 #
 plot(NBScDf$NBScCMS,nbsxCMS,pch=20,cex=0.75,col="tan",
-                      xlab="Net Basin Suppy, in m^3/s",
-                      ylab="Prec - Evap + Runoff, in m^3/s",
-                      main="Relation Between Computed and Apparent Lake Superior Net Basin Supply",
-                      cex.main = 0.8)
+     xlab=expression(paste("Component Net Basin Suppy, in ",m^3 %.% s^-1)),
+     ylab=expression(paste("Prec - Evap + Runoff, in   ",m^3 %.% s^-1)),
+     main="Relation Between Computed and Apparent Lake Superior Net Basin Supply",
+     cex.main = 0.8)
 #
 abline(0,1,col="red",lty="dashed")
 #
@@ -129,30 +137,53 @@ abline(0,1,col="red",lty="dashed")
 
 ```{r}
 # rm(list=setdiff(ls(),c("NBSrDf","NBScDf")))
+# Load density fitting library
+library(locfit) 
 #
 # Density of Precipitation
-densPrecCMS <- density(NBScDf$precCMS)
-plot(densPrecCMS,xlab=expression(paste("Monthly Flow Equivalent, in  ",m^{3} %.% s^{-1})),
+# densPrecCMS <- density(NBScDf$precCMS)
+
+locMod   <- locfit( ~ lp(NBScDf$precCMS))
+# Quantiles to evalute 
+locEval  <- seq(min(NBScDf$precCMS),max(NBScDf$precCMS),length.out = 500)
+# Estimates for evaluated quantiles
+locFit   <- predict(locMod,locEval)
+#
+plot(locEval,locFit,type="l",
+     xlab=expression(paste("Monthly Flow Equivalent, in  ",m^{3} %.% s^{-1})),
      ylab="Empirical Probability Density",
      main="Probability Density of Lake Superior Monthly Estimates of Precipitation",
      cex.main=0.9)
-x1 <- min(which(densPrecCMS$x >= min(NBScDf$precCMS) ))  
-x2 <- max(which(densPrecCMS$x <  max(NBScDf$precCMS) ))
-with(densPrecCMS, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="tan"))
+x1 <- min(which(locEval >=  min(NBScDf$precCMS) ))  
+x2 <- max(which(locEval <   max(NBScDf$precCMS) ))
+polygon(x=c(locEval,                rev(locEval),locEval[1]),
+        y=c(rep(0,length(locEval)), rev(locFit ),0),
+        col="tan")
 #
 # Density of Evaporation
-densEvapCMS <- density(NBScDf$evapCMS)
-plot(densEvapCMS,xlab=expression(paste("Monthly Flow Equivalent, in  ",m^{3} %.% s^{-1})),
+#
+locMod   <- locfit( ~ lp(NBScDf$evapCMS))
+# Quantiles to evalute 
+locEval  <- seq(min(NBScDf$evapCMS),max(NBScDf$evapCMS),length.out = 500)
+# Estimates for evaluated quantiles
+locFit   <- predict(locMod,locEval)
+#
+# densEvapCMS <- density(NBScDf$evapCMS)
+plot(locEval,locFit,type="l",
+     xlab=expression(paste("Monthly Flow Equivalent, in  ",m^{3} %.% s^{-1})),
      ylab="Empirical Probability Density",
      main="Probability Density of Lake Superior Monthly Estimates of Evaporation",
      cex.main=0.9)
-x1 <- min(which(densEvapCMS$x >=  min(NBScDf$evapCMS) ))  
-x2 <- max(which(densEvapCMS$x <   max(NBScDf$evapCMS) ))
-with(densEvapCMS, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="tan"))
+x1 <- min(which(locEval >=  min(NBScDf$evapCMS) ))  
+x2 <- max(which(locEval <   max(NBScDf$evapCMS) ))
+polygon(x=c(locEval,                rev(locEval),locEval[1]),
+        y=c(rep(0,length(locEval)), rev(locFit ),0),
+        col="tan")
 #
 # Density of Basin Runoff
 densrOffCMS <- density(NBScDf$rOffCMS)
-plot(densrOffCMS,xlab=expression(paste("Monthly Flow Equivalent, in  ",m^{3} %.% s^{-1})),
+plot(densrOffCMS,
+     xlab=expression(paste("Monthly Flow Equivalent, in  ",m^{3} %.% s^{-1})),
      ylab="Empirical Probability Density",
      main="Probability Density of Lake Superior Monthly Estimates of Basin Runoff",
      cex.main=0.9)
@@ -162,7 +193,8 @@ with(densrOffCMS, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="tan
 #
 # Density of Net Basin Supply
 densNBSc <- density(NBScDf$NBScCMS)
-plot(densNBSc,xlab=expression(paste("Monthly Flow, in  ",m^{3} %.% s^{-1})),
+plot(densNBSc,
+     xlab=expression(paste("Monthly Flow, in  ",m^{3} %.% s^{-1})),
      ylab="Empirical Probability Density",
      main="Probability Density of Monthly Series of Lake Superior Components Estimate of Net Basin Supply",
      cex.main=0.9)
