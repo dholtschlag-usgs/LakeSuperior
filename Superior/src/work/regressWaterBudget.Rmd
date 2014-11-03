@@ -1,12 +1,19 @@
 # Multiple regression analysis of monthly water balance components
+```{r}
 #
 # Clear workspace
 rm(list=ls())
+#
+# utils library is used with download.file construct
+library(utils)
+#
+# URL for GitHub file
+urlName <- "https://raw.githubusercontent.com/dholtschlag-usgs/LakeSuperior/master/Superior/data/Monthly/SupMergedCMS.txt"
+# method="curl" does not work
+download.file(urlName, destfile = "SupMergedCMS.txt", method = "wget")
+#
 # read merged data file
-pName      <- getwd()
-fName      <- "/Superior/data/Monthly/SupMergedCMS.txt"
-fullName   <- paste(pName,fName,sep="")
-NBSrcDf    <- read.table(file=fullName,header=TRUE,sep="\t",
+NBSrcDf    <- read.table("SupMergedCMS.txt",sep="\t",header=TRUE,comment.char="#",
                          stringsAsFactors = FALSE)
 # Convert character date strings to dates
 NBSrcDf$DateSeq <- as.Date(NBSrcDf$DateSeq,format="%Y-%m-%d")
@@ -250,3 +257,4 @@ for (i in 1:10){
     abline(h=0,col="red",lty="dotdash")
   }
 }
+```
