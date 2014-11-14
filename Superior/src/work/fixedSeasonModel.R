@@ -1,5 +1,131 @@
 # MARSS model with time-varying parameters
 #
+# Clear workspace
+rm(list=ls())
+# Setup Lake Superior Data
+pName     <- getwd()
+fName     <- "/Superior/src/work/setupMonthlyDataFrame.R"
+fullName  <- paste(pName,fName,sep="")
+source(fullName)
+#
+library(MARSS)
+# Budget Components
+waterBudget <- c("stmr","prec","evap","rOff","dSto")
+
+TT        <- 12*62  # 33 years of monthly data, max = 62 
+NBSrcMtrx <- as.matrix(NBSrcDf[1:TT,c("stmrCMS","precCMS","evapCMS","rOffCMS","dStoCMS")])
+
+dat       <- t(NBSrcMtrx)
+#
+# z.score data because we changed the mean when we subsampled
+the.mean = apply(dat,1,mean,na.rm=TRUE)
+the.sigma = sqrt(apply(dat,1,var,na.rm=TRUE))
+# Replace original data with z-scores
+# dat = (dat-the.mean)*(1/the.sigma)
+# Replace original time series with demeaned values
+dat <- (dat-the.mean)
+# number of time periods/samples
+TT = dim(dat)[2]
+###################################################
+### code chunk number 12: Covar_sec6_02_set-up-month-factors
+###################################################
+# number of "seasons" (e.g., 12 months per year)
+period = 12
+# first "season" (e.g., Jan = 1, July = 7)
+per.1st = 1
+# create factors for seasons
+c.in = diag(period)
+for(i in 2:(ceiling(TT/period))) {c.in = cbind(c.in,diag(period))}
+# trim c.in to correct start & length
+c.in = c.in[,(1:TT)+(per.1st-1)]
+# better row names
+rownames(c.in) = month.abb
+#
+C = matrix(month.abb,5,12,byrow=TRUE)
+C
+
+###################################################
+### code chunk number 14: Covar_sec6_04_C-constrained2
+###################################################
+C = "unconstrained"
+
+###################################################
+### code chunk number 15: Covar_sec6_05_month-factor-marss-params
+###################################################
+# Each taxon has unique density-dependence
+B = "diagonal and unequal"
+# B = "identity"
+# Assume independent process errors
+Q = "diagonal and unequal"
+# We have demeaned the data & are fitting a mean-reverting model
+# by estimating a diagonal B, thus
+# U = matrix(c(rowMeans(dat)),5,1)
+# U = "unconstrained"
+U = "zero"
+# Each obs time series is associated with only one process
+Z = "identity" 
+# The data are demeaned & fluctuate around a mean
+A = "zero" 
+# We assume observation errors are independent, but they
+# have similar variance due to similar collection methods
+R = "diagonal and unequal"
+# We are not including covariate effects in the obs equation
+D = "zero"
+d = "zero"
+# Compute model
+model.list = list(B=B,U=U,Q=Q,Z=Z,A=A,R=R,C=C,c=c.in,D=D,d=d)
+fixedSeasAR1diagRdiag.model = MARSS(dat,model=model.list,
+                               control=list(maxit=2000))
+# Compute parameter uncertainities
+fixedSeasAR1diagRdiag.ParCI <- MARSSparamCIs(fixedSeasAR1diagRdiag.model)
+
+# Get the estimated seasonal effects
+# rows are taxa, cols are seasonal effects
+seas.1 = coef(seas.mod.1,type="matrix")$C
+rownames(seas.1) = waterBudget
+colnames(seas.1) = month.abb
+#
+
+matplot(t(seas.1),type="l",bty="n",xaxt="n", ylab="Fixed monthly", col=1:5)
+axis(1,labels=month.abb, at=1:12,las=1,cex.axis=0.75)
+legend("topright", lty=1:5, legend=waterBudget, cex=0.8, col=1:5)
+abline(h=0,col="grey",lty="dotdash")
+
+parmCIinfo <- MARSSparamCIs(seas.mod.1, method = "hessian", alpha = 0.05, nboot=1000)
+
+loCI_Seas  <- parmCIinfo$par.lowCI$U;
+hiCI_Seas  <- parmCIinfo$par.upCI$U
+mean_Seas  <- coef(parmCIinfo)$C
+
+plot(1:12,mean_Seas[1:12],col="black",type="s",lty="solid",xaxt="n",
+     ylim=c(-1.5,1))
+axis(1,labels=month.abb, at=seq(1,12,by=1))
+
+lines(1:12,loCI_Seas[1:12],col="grey",type="s",lty="dashed")
+lines(1:12,hiCI_Seas[1:12],col="grey",type="s",lty="dashed")
+
+library(ggplot2)
+# http://www.cookbook-r.com/Graphs/Plotting_means_and_error_bars_(ggplot2)/
+# dfc <- summarySE(df, measurevar="len", groupvars=c("supp","dose"))
+# supp dose  N   len       sd        se       ci
+#   OJ  0.5 10 13.23 4.459709 1.4102837 3.190283
+#   OJ  1.0 10 22.70 3.910953 1.2367520 2.797727
+#   OJ  2.0 10 26.06 2.655058 0.8396031 1.899314
+#   VC  0.5 10  7.98 2.746634 0.8685620 1.964824
+#   VC  1.0 10 16.77 2.515309 0.7954104 1.799343
+#   VC  2.0 10 26.14 4.797731 1.5171757 3.432090
+
+# pd <- position_dodge(.1)  # move them .05 to the left and right
+# Use 95% confidence interval instead of SEM
+# ggplot(dfc, aes(x=dose, y=len, colour=supp)) + 
+#   geom_errorbar(aes(ymin=len-ci, ymax=len+ci), width=.1, position=pd) +
+#   geom_line(position=pd) +
+#   geom_point(position=pd)
+
+
+
+
+
 # Component NBS Eqn:
 # NBS = Precipitation + Runoff - Evaporation
 # Residual NBS Eqn:
@@ -157,4 +283,7 @@ rownames(vecDat) <- c("stmr","prec","rOff","divr","evap","dSto")
 y = vecDat
 model.list = list(B=B,U=U,Q=Q,Z=Z,A=A,R=R,C=C,c=cin,D=D,d=d)
 seaMARSS   <- MARSS(y,model.list,control=list(maxit=1500))
+
+MARSSparamCIs(seaMARSS, method = "hessian", alpha = 0.05, nboot=1000)
+
 
