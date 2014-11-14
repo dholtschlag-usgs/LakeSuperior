@@ -20,4 +20,5 @@ setupMonthlyDataFrame.R   Merges residual and component dataframes on date.
 
 simpleRegressionModel_Compare_LM_MARSS  Develops multiple-linear regression equations using both linear regression and MARSS output-only equation.  Shows the magnitude and uncertaintiy of parameters are consistent for the two methods.  Shows acf of model residuals and apparent trend in residuals with flow magnitude on St. Marys River.
 
-  
+monthlyWaterBudgetModels.R   Develops monthly multiple regression and AR[1] multiple regression models for Lake Superior Water Budget.  Show monthly parameter estimates and 95% confidence intervals and relation between measured and estimated flows.  A plot compares R2 values for from annual and monthly (AR[1]) multiple regression models.  AR[1] parameters for November and December models are greater than 1.  Note .Rmd and .html files are included from script. 
+
