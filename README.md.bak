@@ -22,3 +22,4 @@ simpleRegressionModel_Compare_LM_MARSS  Develops multiple-linear regression equa
 
 monthlyWaterBudgetModels.R   Develops monthly multiple regression and AR[1] multiple regression models for Lake Superior Water Budget.  Show monthly parameter estimates and 95% confidence intervals and relation between measured and estimated flows.  A plot compares R2 values for from annual and monthly (AR[1]) multiple regression models.  AR[1] parameters for November and December models are greater than 1.  Note .Rmd and .html files are included from script. 
 
+readPlotDiversions.R     Read and plot monthly flow diversions to Lake Superior from Long Lac and Ogoki River.
