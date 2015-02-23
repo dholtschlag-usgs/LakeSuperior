@@ -1,6 +1,5 @@
 # Read monthly data files and merge data by dates to common dataframe
 #
-# Read 
 # Clear memory
 rm(list=ls())
 # generate components dataframe
@@ -17,6 +16,9 @@ source(fullName)
 #
 # Merge the two data files by DateSeq
 NBSrcDf <- merge(NBScDf,NBSrDf)
+
+# Assign month to data column
+NBSrcDf$Month <- format(NBSrcDf$DateSeq,'%m')
 #
 # write the merged data set to an ascii file
 fName     <- "/Superior/data/Monthly/SupMergedCMS.txt"

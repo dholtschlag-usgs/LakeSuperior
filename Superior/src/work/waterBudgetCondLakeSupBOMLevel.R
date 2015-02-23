@@ -98,7 +98,7 @@ for (i in 1:nParm){
   for (j in 1:12){
     lines(c(j,j),c(uCIMat7[j,i],lCIMat7[j,i]),col="blue",lty="dotted")
   }
-  if (i == 7){
+  if (names(coef(monLm))[i] == "ar01Stmr"){
     abline(h=1,col="red",lty="dashed")
   }
 }
@@ -147,7 +147,7 @@ for (i in 1:nParm){
   for (j in 1:12){
     lines(c(j,j),c(uCIMat8[j,i],lCIMat8[j,i]),col="blue",lty="dotted")
   }
-  if (i == 8){
+  if (names(coef(monLm))[i] == "ar01Stmr"){
     abline(h=1,col="red",lty="dashed")
   }
 }
@@ -194,7 +194,7 @@ for (i in 1:nParm){
   for (j in 1:12){
     lines(c(j,j),c(uCIMat7a[j,i],lCIMat7a[j,i]),col="blue",lty="dotted")
   }
-  if (i == 8){
+  if (names(coef(monLm))[i] == "ar01Stmr"){
     abline(h=1,col="red",lty="dashed")
   }
 }

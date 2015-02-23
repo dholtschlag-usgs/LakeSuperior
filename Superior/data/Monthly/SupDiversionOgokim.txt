@@ -7,6 +7,7 @@
 # Recieved as an email attachment from Jacob Bruxer, Envir. Canada, Jacob.Bruxer@ec.gc.ca, on or about Nov. 14, 2014.  
 # Made minor changes to file to comment "#" for UNITS:m3s and INTERVAL:m above, an added lines for source documentation.
 # Data file is presumed to supersede previous info on diversions.
+Year    JAN    FEB    MAR    APR    MAY    JUN    JUL    AUG    SEP    OCT    NOV    DEC
 1939      0.      0.      0.      0.      0.      0.      0.      0.      0.      0.      0.      0.
 1940      0.      0.      0.      0.      0.      0.      0.      0.      0.      0.      0.      0.
 1941      0.      0.      0.      0.      0.      0.      0.      0.      0.      0.      0.      0.
@@ -82,4 +83,4 @@
 2011     91.     75.     64.     71.    165.    256.    197.     72.     86.     73.     56.     44.
 2012     37.     36.     41.    108.    160.      0.    196.    221.    129.     89.     72.     65.
 2013     54.     50.     51.     48.    123.    271.    154.     50.     52.    152.    140.     99.
-2014     78.     62.     53.     54.    155.    221.     48.     44.    156.  -9999.  -9999.  -9999.
+2014     78.     62.     53.     54.    155.    221.     48.     44.    156.     NA      NA      NA

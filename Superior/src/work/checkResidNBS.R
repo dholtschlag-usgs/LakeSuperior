@@ -56,7 +56,7 @@ fullName <- paste(pName,fName,sep="")
 df1      <- read.table(fullName, header = TRUE, sep = "\t", comment.char = "#")
 mat1     <- as.matrix(df1[,2:13])
 # Convert transposed matrix to vector
-divrCMS  <- as.vector(t(mat1))
+divrCMS      <- as.vector(t(mat1))
 divrBegDate  <- as.Date(paste(df1[1,1],'01/01',sep="/"))
 divrEndDate  <- as.Date(paste(tail(df1[,1], n= 1),"12/01",sep="/"))
 # Create date sequence
@@ -70,6 +70,46 @@ plot(divrDateSeq,divrCMS,type="l",
      ylab=expression(paste("Diversions into Lake Superior, in   ",m^3 %.% s^-1)),
      xlab="year",col="brown4")
 #
+# Read inflow diversions data from Long Lac
+fName    <- "/Superior/data/Monthly/SupDiversionLongLac.txt"
+fullName <- paste(pName,fName,sep="")
+df1      <- read.table(fullName, header = TRUE, sep = "", comment.char = "#")
+mat1     <- as.matrix(df1[,2:13])
+# Convert transposed matrix to vector
+lLacCMS      <- as.vector(t(mat1))
+lLacBegDate  <- as.Date(paste(df1[1,1],'01/01',sep="/"))
+lLacEndDate  <- as.Date(paste(tail(df1[,1], n= 1),"12/01",sep="/"))
+# Create date sequence
+lLacDateSeq  <- seq(from = lLacBegDate, to = lLacEndDate, by = "month")
+# Create dataframe for diversions
+lLacDf       <- cbind.data.frame(lLacDateSeq,lLacCMS)
+# Plot monthly diversion time series
+par(mar=c(5,4.4,4,2)+0.1,las=1)
+plot(lLacDateSeq,lLacCMS,type="l",
+     main="Monthly Series of Diversions from Long Lake to Lake Superior",
+     ylab=expression(paste("Diversions into Lake Superior, in   ",m^3 %.% s^-1)),
+     xlab="year",col="brown4")
+#
+# Read inflow diversions data from Lake Ogoki
+fName    <- "/Superior/data/Monthly/SupDiversionOgokim.txt"
+fullName <- paste(pName,fName,sep="")
+df1      <- read.table(fullName, header = TRUE, sep = "", comment.char = "#")
+mat1     <- as.matrix(df1[,2:13])
+# Convert transposed matrix to vector
+lOgoCMS      <- as.vector(t(mat1))
+lOgoBegDate  <- as.Date(paste(df1[1,1],'01/01',sep="/"))
+lOgoEndDate  <- as.Date(paste(tail(df1[,1], n= 1),"12/01",sep="/"))
+# Create date sequence
+lOgoDateSeq  <- seq(from = lOgoBegDate, to = lOgoEndDate, by = "month")
+# Create dataframe for diversions
+lOgoDf       <- cbind.data.frame(lOgoDateSeq,lOgoCMS)
+# Plot monthly diversion time series
+par(mar=c(5,4.4,4,2)+0.1,las=1)
+plot(lOgoDateSeq,lOgoCMS,type="l",
+     main="Monthly Series of Diversions from Lake Ogoki to Lake Superior",
+     ylab=expression(paste("Diversions into Lake Superior, in   ",m^3 %.% s^-1)),
+     xlab="year",col="green4")
+
 # Read computed residual NBS data
 fName    <- "/Superior/data/Monthly/SupNBSresidCMS.txt"
 fullName <- paste(pName,fName,sep="")
@@ -98,18 +138,22 @@ storStmrDf <- merge(storDf,stmrDf, by.x = "DateSeq", by.y = "stmrDateSeq")
 storStrmDivrDf  <- merge(storStmrDf, divrDf, by.x = "DateSeq", by.y = "divrDateSeq")
 # Merge with rNBS by date
 storStmrDivrNBSrDf  <- merge(storStrmDivrDf, NBSrDf, by.x = "DateSeq", by.y = "NBSrDateSeq")
+# Merge with Long Lac by date
+storStmrDivrNBSrlLacDf <- merge(storStmrDivrNBSrDf, lLacDf, by.x = "DateSeq", by.y = "lLacDateSeq")
+# Merge with Lake Ogoki by date
+storStmrDivrNBSrlLaclOgoDf <- merge(storStmrDivrNBSrlLacDf, lOgoDf, by.x = "DateSeq", by.y = "lOgoDateSeq")
 # Check rNBS as the sum of change in storage plus outflow
 checkNBSrCMS <- storStmrDivrNBSrDf$dStoCMS + storStmrDivrNBSrDf$stmrCMS - storStmrDivrNBSrDf$divrCMS; 
 # Simplify merged dataframe name
-NBSrDf       <- storStmrDivrNBSrDf
+NBSrDf       <- storStmrDivrNBSrlLaclOgoDf
 #
-par(mar=c(5,4.4,4,2)+0.1,las=1)
-plot(checkNBSrCMS,NBSrDf$NBSrCMS,pch=20,cex=0.75,col="tan",
-     xlab=expression(paste("Change In Storage - Inflow + Outflow, in   ",m^3 %.% s^-1)),
-     ylab=expression(paste("Residual Net Basin Supply, in   ",m^3 %.% s^-1)),
-     main="Relation Between Computed and Apparent Lake Superior Residual Net Basin Supply",
-     cex.main = 0.9)
-abline(0,1,col="red",lty="dashed")
+# par(mar=c(5,4.4,4,2)+0.1,las=1)
+# plot(checkNBSrCMS,NBSrDf$NBSrCMS,pch=20,cex=0.75,col="tan",
+#      xlab=expression(paste("Change In Storage - Inflow + Outflow, in   ",m^3 %.% s^-1)),
+#      ylab=expression(paste("Residual Net Basin Supply, in   ",m^3 %.% s^-1)),
+#      main="Relation Between Computed and Apparent Lake Superior Residual Net Basin Supply",
+#      cex.main = 0.9)
+# abline(0,1,col="red",lty="dashed")
 #
 # Density of Changes in Lake Storage
 densdStoCMS <- density(NBSrDf$dStoCMS)
@@ -120,12 +164,12 @@ x1 <- min(which(densdStoCMS$x >= min(NBSrDf$dStoCMS) ))
 x2 <- max(which(densdStoCMS$x <  max(NBSrDf$dStoCMS) ))
 with(densdStoCMS, polygon(x=c(x[c(x1,x1:x2,x2)]), y= c(0, y[x1:x2], 0), col="tan"))
 #
-par(mar=c(5,5,4,2))
-plot(DateSeq,cumsum(NBSrDf$dStoCMS),type="l",col="blue",
-     xlab="Year",
-     ylab=expression(paste("Cumulative Sum of Change in Storage (  ", m^{3} %.% s^{-1},")")),
-     main="Series of Cumulative Sum of Monthly Changes in Lake Superior Storage")
-abline(h=0,col="red",lty="dashed")
+# par(mar=c(5,5,4,2))
+# plot(DateSeq,cumsum(NBSrDf$dStoCMS),type="l",col="blue",
+#      xlab="Year",
+#      ylab=expression(paste("Cumulative Sum of Change in Storage (  ", m^{3} %.% s^{-1},")")),
+#      main="Series of Cumulative Sum of Monthly Changes in Lake Superior Storage")
+# abline(h=0,col="red",lty="dashed")
 
 # Probability density of St. Marys River Outflows
 densstmrCMS <- density(NBSrDf$stmrCMS)

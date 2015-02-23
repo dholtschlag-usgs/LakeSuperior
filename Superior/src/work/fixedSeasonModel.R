@@ -6,13 +6,14 @@ rm(list=ls())
 pName     <- getwd()
 fName     <- "/Superior/src/work/setupMonthlyDataFrame.R"
 fullName  <- paste(pName,fName,sep="")
+# This reads i
 source(fullName)
 #
 library(MARSS)
 # Budget Components
 waterBudget <- c("stmr","prec","evap","rOff","dSto")
 
-TT        <- 12*62  # 33 years of monthly data, max = 62 
+TT        <- 12*62  # 62 years of monthly data, max = 62 
 NBSrcMtrx <- as.matrix(NBSrcDf[1:TT,c("stmrCMS","precCMS","evapCMS","rOffCMS","dStoCMS")])
 
 dat       <- t(NBSrcMtrx)
@@ -78,6 +79,11 @@ fixedSeasAR1diagRdiag.model = MARSS(dat,model=model.list,
                                control=list(maxit=2000))
 # Compute parameter uncertainities
 fixedSeasAR1diagRdiag.ParCI <- MARSSparamCIs(fixedSeasAR1diagRdiag.model)
+
+# Plot the C matrix
+source("Superior/src/work/plotCmatrixCI.R")
+plotCmatrixCI.R(fixedSeasAR1diagRdiag.ParCI)
+
 
 # Get the estimated seasonal effects
 # rows are taxa, cols are seasonal effects

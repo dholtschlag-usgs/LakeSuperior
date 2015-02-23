@@ -66,6 +66,29 @@ plot(rOffDateSeq,rOffCMS,type="l",
      ylab = expression(paste("Basin Runoff, in   ",m^3 %.% s^-1)), 
      xlab = "year",col="brown4")
 #
+
+# Read PrcLdCMS data
+fName    <- "/Superior/data/Monthly/SupPrcLdCMS.txt"
+fullName <- paste(pName,fName,sep="")
+df1      <- read.table(fullName, header = TRUE, sep = "\t", comment.char = "#")
+mat1     <- as.matrix(df1[,2:13])
+#
+# Convert transposed matrix to vector
+PrcLdCMS      <- as.vector(t(mat1))
+PrcLdBegDate  <- as.Date(paste(df1[1,1],'01/01',sep="/"))
+PrcLdEndDate  <- as.Date(paste(tail(df1[,1], n= 1),"12/01",sep="/"))
+# Create date sequence
+PrcLdDateSeq  <- seq(from = PrcLdBegDate, to = PrcLdEndDate, by = "month")
+# Create dataframe for prec
+PrcLdDf       <- cbind.data.frame(PrcLdDateSeq,PrcLdCMS)
+# Plot net basin supply
+par(mar=c(5,4.4,4,2)+0.1,las = 1)
+plot(PrcLdDateSeq,PrcLdCMS,type="l",
+     main="Monthly Series of Overland Precipiation for Lake Superior",
+     ylab=expression(paste("Overland Precipitation, in   ",m^3 %.% s^-1)), 
+     xlab="year",col="blue")
+#
+
 # Read component NBS data
 fName    <- "/Superior/data/Monthly/SupNBScompCMS.txt"
 fullName <- paste(pName,fName,sep="")
@@ -90,22 +113,46 @@ abline(h= 0, col="slategray", lty = "dashed")
 precEvapDf <- merge(precDf,evapDf, by.x = "DateSeq", by.y = "evapDateSeq")
 # Merge rOff by date
 precEvaprOffDf  <- merge(precEvapDf, rOffDf, by.x = "DateSeq", by.y = "rOffDateSeq")
+# Merge PrcLd by date
+precEvaprOffPrcLd <- merge(precEvaprOffDf, PrcLdDf, by.x = "DateSeq", by.y = "PrcLdDateSeq")
+
 # Merge NBScCMS in
-NBScDf      <- merge(precEvaprOffDf, nbs_Df, by.x = "DateSeq", by.y = "nbs_DateSeq")
+NBScDf      <- merge(precEvaprOffPrcLd, nbs_Df, by.x = "DateSeq", by.y = "nbs_DateSeq")
 rm(list=c("precDf","evapDf","rOffDf","nbs_Df","precEvapDf","precEvaprOffDf"))
 #
-# Compute components estimate of net basin supply
-nbsxCMS <- NBScDf$prec - NBScDf$evap + NBScDf$rOff
+# Compute components estimate of net basin supply use components and compared with downloaded data
+NBScDf$NBSxCMS <- NBScDf$precCMS - NBScDf$evapCMS + NBScDf$rOffCMS 
 #
-plot(NBScDf$NBScCMS,nbsxCMS,pch=20,cex=0.75,col="tan",
+plot(NBScDf$NBScCMS,NBScDf$NBSxCMS,pch=20,cex=0.75,col="tan",
                       xlab="Net Basin Suppy, in m^3/s",
                       ylab="Prec - Evap + Runoff, in m^3/s",
                       main="Relation Between Computed and Apparent Lake Superior Net Basin Supply",
                       cex.main = 0.8)
 #
 abline(0,1,col="red",lty="dashed")
+legend("topleft",legend=c("Data pairs","Line of agreement"),
+       col=c("tan","red"), lty=c(NA,"dashed"), pch=c(20,NA),
+       cex=0.7)
 #
-rm(list=setdiff(ls(),c("NBSrDf","NBScDf")))
+# Hidden state mysxCMS possibly associated with unmeasured terms
+# NBScDf$mysxCMS <- NBScDf$stmrCMS - (NBScDf$precCMS - NBScDf$evapCMS + NBScDf$rOffCMS)
+# 
+# plot(NBSrcDf$DateSeq,NBSrcDf$mysxCMS,pch=20,cex=0.75,col="tan",
+#      xlab="Year",cex.lab=0.9, cex.axis = 0.9,
+#      ylab="Stmr - (Prec - Evap + Runoff), in m^3/s",
+#      main="Apparent Flow Annomallies in Monthly Flows not Accounting for GW Input ",
+#      cex.main = 0.8)
+# #
+# abline(h=mean(NBSrcDf$mysxCMS), col="green", lty="solid")
+# abline(h= 0,col="red",lty="dotted")
+# legend("bottomleft",legend=c("Data pairs",
+#                              paste0("Mean: ",format(mean(NBSrcDf$mysxCMS),dig=3)),
+#                              "zero reference"),
+#        col=c("tan","green","red"), lty=c(NA,"solid","dotted"), 
+#        pch=c(20,NA,NA),cex=0.7)
+# 
+# rm(list=setdiff(ls(),c("NBSrDf","NBScDf")))
+
 #
 # Density of Precipitation
 densPrecCMS <- density(NBScDf$precCMS)
