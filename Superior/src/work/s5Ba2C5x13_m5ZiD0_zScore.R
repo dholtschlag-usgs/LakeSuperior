@@ -18,13 +18,16 @@ obsMatrix <- t(as.matrix(NBSrcDf[,c("stmrCMS","precCMS","evapCMS","rOffCMS","dSt
 
 pairs(t(obsMatrix))
 
+obsMatrix[4,] <- log10(obsMatrix[4,])
+# obsMatrix[3,] <- log10(obsMatrix[3,])
+
+zObsMatrix    <- t(scale(t(obsMatrix)))
+
 library(ggplot2)
 plotmatrix(t(zObsMatris)) + geom_smooth(method="lm")
 
 library(GGally)
 ggpairs(t(zObsMatrix)) + geom_smooth
-
-
 
 # z-score the obsMatrix with scale to improve stability (?)
 zObsMatrix <- t(scale(t(obsMatrix)))
