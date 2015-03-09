@@ -2,3 +2,4 @@
 .Rhistory
 .RData
 Rplot*.pdf
+*.bak

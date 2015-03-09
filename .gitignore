@@ -3,3 +3,4 @@
 .RData
 Rplot*.pdf
 *.bak
+*.RData
